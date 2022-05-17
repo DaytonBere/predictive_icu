@@ -1,0 +1,499 @@
+To download the datasets run the following SQL queries.
+
+MIMIC_IV.csv:
+==========================================================================================================================
+
+WITH chart AS (
+    SELECT hadm_id, itemid, valuenum, value, charttime
+    FROM `physionet-data.mimic_icu.chartevents`
+    WHERE itemid = 220045 OR itemid = 220179 OR itemid = 220180 OR itemid = 220210 OR itemid = 220277 OR itemid = 223761
+    OR itemid = 220181 OR itemid = 224641 OR itemid = 220739 OR itemid = 223900 OR itemid = 223901
+),
+
+subjects AS (
+    SELECT subject_id, MAX(hadm_id) AS hadm_id
+    FROM `physionet-data.mimic_icu.icustays`
+    GROUP BY subject_id
+),
+
+results_fst AS (
+    SELECT s.subject_id, c.hadm_id, c.itemid, MIN(c.charttime) AS charttime
+    FROM subjects AS s
+    INNER JOIN chart AS c
+        ON s.hadm_id = c.hadm_id
+    GROUP BY s.subject_id, c.hadm_id, c.itemid
+),
+
+results_lst AS (
+    SELECT s.subject_id, c.hadm_id, c.itemid, MAX(c.charttime) AS charttime
+    FROM subjects AS s
+    INNER JOIN chart AS c
+        ON s.hadm_id = c.hadm_id
+    GROUP BY s.subject_id, c.hadm_id, c.itemid
+),
+
+heart_fst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_fst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220045
+),
+
+non_invasive_bp_s_fst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_fst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220179
+),
+
+non_invasive_bp_d_fst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_fst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220181
+),
+
+non_invasive_bp_sd_fst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_fst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220180
+),
+
+respiratory_fst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_fst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220210
+),
+
+oxygen_fst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_fst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220277
+),
+
+temperature_fst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_fst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 223761
+),
+
+eye_fst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_fst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220739
+),
+
+verbal_fst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_fst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 223900
+),
+
+motor_fst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_fst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 223901
+),
+
+heart_lst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_lst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220045
+),
+
+non_invasive_bp_s_lst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_lst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220179
+),
+
+non_invasive_bp_d_lst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_lst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220181
+),
+
+non_invasive_bp_sd_lst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_lst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220180
+),
+
+respiratory_lst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_lst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220210
+),
+
+oxygen_lst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_lst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220277
+),
+
+temperature_lst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_lst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 223761
+),
+
+eye_lst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_lst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 220739
+),
+
+verbal_lst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_lst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 223900
+),
+
+motor_lst AS (
+    SELECT r.hadm_id, r.itemid, c.valuenum, c.value
+    FROM results_lst AS r
+
+    INNER JOIN chart AS c
+    ON r.hadm_id = c.hadm_id AND r.itemid = c.itemid AND r.charttime = c.charttime
+
+    WHERE r.itemid = 223901
+),
+
+patients AS (
+    SELECT subject_id, gender, anchor_age AS age
+    FROM `physionet-data.mimic_core.patients`
+    WHERE anchor_age > 15 AND anchor_age < 91
+),
+
+admin AS (
+    SELECT deathtime AS mortality, hadm_id
+    FROM `physionet-data.mimic_core.admissions`
+)
+
+
+SELECT s.subject_id, s.hadm_id, p.age, p.gender, hr_f.valuenum AS bpm_f, hr_l.valuenum AS bpm_l, res_f.valuenum AS resp_rate_f, tem_f.valuenum AS tem_f, tem_l.valuenum AS tem_l, 
+res_l.valuenum AS resp_rate_l, oxy_f.valuenum AS O2_sat_f,
+oxy_l.valuenum AS O2_sat_l, bps_f.valuenum AS bps_f, bps_l.valuenum AS bps_l, bpd_f.valuenum AS bpd_f, bpd_l.valuenum AS bpd_l, bpsd_f.valuenum AS bpsm_f, bpsd_l.valuenum AS bpsm_l,
+eye_f.valuenum AS eye_resp_f, eye_l.valuenum AS eye_resp_l, ver_f.valuenum AS verbal_resp_f, ver_l.valuenum AS verbal_resp_l, 
+mot_f.valuenum AS motor_resp_f, mot_l.valuenum AS motor_resp_l, a.mortality AS death 
+
+FROM patients AS p
+
+INNER JOIN subjects AS s 
+    ON p.subject_id = s.subject_id
+INNER JOIN heart_fst AS hr_f 
+    ON s.hadm_id = hr_f.hadm_id
+INNER JOIN non_invasive_bp_s_fst AS bps_f
+    ON s.hadm_id  = bps_f.hadm_id
+INNER JOIN non_invasive_bp_d_fst AS bpd_f
+    ON s.hadm_id = bpd_f.hadm_id
+INNER JOIN respiratory_fst AS res_f
+    ON s.hadm_id = res_f.hadm_id
+INNER JOIN oxygen_fst AS oxy_f
+    ON s.hadm_id = oxy_f.hadm_id
+INNER JOIN temperature_fst AS tem_f
+    ON s.hadm_id = tem_f.hadm_id
+INNER JOIN non_invasive_bp_sd_fst AS bpsd_f
+    ON s.hadm_id = bpsd_f.hadm_id
+INNER JOIN eye_fst AS eye_f
+    ON s.hadm_id = eye_f.hadm_id
+INNER JOIN verbal_fst AS ver_f
+    ON s.hadm_id = ver_f.hadm_id
+INNER JOIN motor_fst AS mot_f
+    ON s.hadm_id = mot_f.hadm_id
+INNER JOIN heart_lst AS hr_l
+    ON s.hadm_id = hr_l.hadm_id
+INNER JOIN non_invasive_bp_s_lst AS bps_l
+    ON s.hadm_id  = bps_l.hadm_id
+INNER JOIN non_invasive_bp_d_lst AS bpd_l
+    ON s.hadm_id = bpd_l.hadm_id
+INNER JOIN respiratory_lst AS res_l
+    ON s.hadm_id = res_l.hadm_id
+INNER JOIN oxygen_lst AS oxy_l
+    ON s.hadm_id = oxy_l.hadm_id
+INNER JOIN temperature_lst AS tem_l
+    ON s.hadm_id = tem_l.hadm_id
+INNER JOIN non_invasive_bp_sd_lst AS bpsd_l
+    ON s.hadm_id = bpsd_l.hadm_id
+INNER JOIN eye_lst AS eye_l
+    ON s.hadm_id = eye_l.hadm_id
+INNER JOIN verbal_lst AS ver_l
+    ON s.hadm_id = ver_l.hadm_id
+INNER JOIN motor_lst AS mot_l
+    ON s.hadm_id = mot_l.hadm_id
+INNER JOIN admin AS a
+    ON s.hadm_id = a.hadm_id
+
+ORDER BY s.subject_id;
+
+
+eICU.csv:
+==========================================================================================================================
+
+WITH hospitals AS (
+    SELECT hospitalid
+    FROM `physionet-data.eicu_crd.hospital`
+    WHERE (numbedscategory LIKE '%100' OR numbedscategory LIKE '%249') OR (numbedscategory LIKE '%500' AND teachingstatus = false)
+),
+
+patients AS (
+    SELECT p.patientunitstayid, p.gender, p.age, p.hospitaldischargelocation
+    FROM `physionet-data.eicu_crd.patient` AS p
+
+    INNER JOIN hospitals AS h
+    ON p.hospitalid = h.hospitalid
+
+),
+
+min_apid AS (
+    SELECT patientunitstayid, MIN(vitalaperiodicid) AS vitalaperiodicid
+    FROM `physionet-data..eicu_crd.vitalaperiodic`
+    WHERE noninvasivesystolic IS NOT NULL AND noninvasivediastolic IS NOT NULL AND noninvasivemean IS NOT NULL
+    GROUP BY patientunitstayid
+),
+
+min_pid AS (
+    SELECT patientunitstayid, MIN(vitalperiodicid) AS vitalperiodicid
+    FROM `physionet-data..eicu_crd.vitalperiodic`
+    WHERE temperature IS NOT NULL AND heartrate IS NOT NULL AND respiration IS NOT NULL AND saO2 IS NOT NULL
+    GROUP BY patientunitstayid
+),
+
+max_apid AS (
+    SELECT patientunitstayid, MAX(vitalaperiodicid) AS vitalaperiodicid
+    FROM `physionet-data..eicu_crd.vitalaperiodic`
+    WHERE noninvasivesystolic IS NOT NULL AND noninvasivediastolic IS NOT NULL AND noninvasivemean IS NOT NULL
+    GROUP BY patientunitstayid
+),
+
+max_pid AS (
+    SELECT patientunitstayid, MAX(vitalperiodicid) AS vitalperiodicid
+    FROM `physionet-data..eicu_crd.vitalperiodic`
+    WHERE temperature IS NOT NULL AND heartrate IS NOT NULL AND respiration IS NOT NULL AND saO2 IS NOT NULL
+    GROUP BY patientunitstayid
+),
+
+min_aperiodic AS (
+    SELECT i.vitalaperiodicid, i.patientunitstayid, p.noninvasivesystolic AS bps, p.noninvasivediastolic AS bpd, p.noninvasivemean AS bpsm
+	FROM min_apid AS i
+
+    INNER JOIN `physionet-data..eicu_crd.vitalaperiodic` AS p
+    ON i.vitalaperiodicid = p.vitalaperiodicid
+),
+
+max_aperiodic AS (
+    SELECT i.vitalaperiodicid, i.patientunitstayid, p.noninvasivesystolic AS bps, p.noninvasivediastolic AS bpd, p.noninvasivemean AS bpsm
+	FROM max_apid AS i
+
+    INNER JOIN `physionet-data..eicu_crd.vitalaperiodic` AS p
+    ON i.vitalaperiodicid = p.vitalaperiodicid 
+),
+
+min_periodic AS (
+    SELECT i.vitalperiodicid, i.patientunitstayid, p.temperature AS tem, p.heartrate AS bpm, p.respiration AS resp_rate, p.saO2 AS O2_sat
+	FROM min_pid AS i
+
+    INNER JOIN `physionet-data..eicu_crd.vitalperiodic` AS p
+    ON i.vitalperiodicid = p.vitalperiodicid 
+),
+
+max_periodic AS (
+    SELECT i.vitalperiodicid, i.patientunitstayid, p.temperature AS tem, p.heartrate AS bpm, p.respiration AS resp_rate, p.saO2 AS O2_sat
+	FROM max_pid AS i
+
+    INNER JOIN `physionet-data..eicu_crd.vitalperiodic` AS p
+    ON i.vitalperiodicid = p.vitalperiodicid
+),
+
+min_eye_id AS (
+    SELECT patientunitstayid, MIN(physicalexamid) AS physicalexamid 
+    FROM `physionet-data..eicu_crd.physicalexam`
+    WHERE physicalexampath LIKE '%Eyes Score%'
+    GROUP BY patientunitstayid
+),
+
+min_eye AS (
+    SELECT i.patientunitstayid, d.physicalexamvalue
+    FROM min_eye_id AS i
+
+    INNER JOIN `physionet-data..eicu_crd.physicalexam` AS d
+    ON i.physicalexamid = d.physicalexamid
+),
+
+max_eye_id AS (
+    SELECT patientunitstayid, MAX(physicalexamid) AS physicalexamid
+    FROM `physionet-data..eicu_crd.physicalexam`
+    WHERE physicalexampath LIKE '%Eyes Score%'
+    GROUP BY patientunitstayid
+),
+
+max_eye AS (
+    SELECT i.patientunitstayid, d.physicalexamvalue
+    FROM max_eye_id AS i
+
+    INNER JOIN `physionet-data..eicu_crd.physicalexam` AS d
+    ON i.physicalexamid = d.physicalexamid
+),
+
+min_verb_id AS (
+    SELECT patientunitstayid, MIN(physicalexamid) AS physicalexamid
+    FROM `physionet-data..eicu_crd.physicalexam`
+    WHERE physicalexampath LIKE '%Verbal Score%'
+    GROUP BY patientunitstayid
+),
+
+min_verb AS (
+    SELECT i.patientunitstayid, d.physicalexamvalue
+    FROM min_verb_id AS i
+
+    INNER JOIN `physionet-data..eicu_crd.physicalexam` AS d
+    ON i.physicalexamid = d.physicalexamid
+),
+
+max_verb_id AS (
+    SELECT patientunitstayid, MAX(physicalexamid) AS physicalexamid
+    FROM `physionet-data..eicu_crd.physicalexam`
+    WHERE physicalexampath LIKE '%Verbal Score%'
+    GROUP BY patientunitstayid
+),
+
+max_verb AS (
+    SELECT i.patientunitstayid, d.physicalexamvalue
+    FROM max_verb_id AS i
+
+    INNER JOIN `physionet-data..eicu_crd.physicalexam` AS d
+    ON i.physicalexamid = d.physicalexamid
+),
+
+min_motor_id AS (
+    SELECT patientunitstayid, MIN(physicalexamid) AS physicalexamid
+    FROM `physionet-data..eicu_crd.physicalexam`
+    WHERE physicalexampath LIKE '%Motor Score%'
+    GROUP BY patientunitstayid
+),
+
+min_motor AS (
+    SELECT i.patientunitstayid, d.physicalexamvalue
+    FROM min_motor_id AS i
+
+    INNER JOIN `physionet-data..eicu_crd.physicalexam` AS d
+    ON i.physicalexamid = d.physicalexamid
+),
+
+max_motor_id AS (
+    SELECT patientunitstayid, MAX(physicalexamid) AS physicalexamid
+    FROM `physionet-data..eicu_crd.physicalexam`
+    WHERE physicalexampath LIKE '%Motor Score%'
+    GROUP BY patientunitstayid
+), 
+
+max_motor AS (
+    SELECT i.patientunitstayid, d.physicalexamvalue
+    FROM max_motor_id AS i
+
+    INNER JOIN `physionet-data..eicu_crd.physicalexam` AS d
+    ON i.physicalexamid = d.physicalexamid
+)
+
+SELECT p.patientunitstayid, p.age, p.gender, mi_p.bpm AS bpm_f, ma_p.bpm AS bpm_l, mi_p.resp_rate AS resp_rate_f,
+ma_p.resp_rate AS resp_rate_l, mi_p.O2_sat AS O2_sat_f, ma_p.O2_sat AS O2_sat_l, mi_p.tem AS tem_f, ma_p.tem AS tem_l, mi_ap.bps AS bps_f, ma_ap.bps AS bps_l, mi_ap.bpd AS bpd_f, ma_ap.bpd AS bpd_l,
+mi_ap.bpsm AS bpsm_f, ma_ap.bpsm AS bpsm_l, min_eye.physicalexamvalue AS eye_resp_f, max_eye.physicalexamvalue AS eye_resp_l,
+min_verb.physicalexamvalue AS verbal_resp_f, max_verb.physicalexamvalue AS verbal_resp_l, 
+min_motor.physicalexamvalue AS motor_resp_f, max_motor.physicalexamvalue AS motor_resp_l, p.hospitaldischargelocation
+FROM patients AS p
+
+INNER JOIN min_aperiodic AS mi_ap
+    ON p.patientunitstayid = mi_ap.patientunitstayid
+INNER JOIN max_aperiodic AS ma_ap
+    ON p.patientunitstayid = ma_ap.patientunitstayid
+INNER JOIN min_periodic AS mi_p
+    ON p.patientunitstayid = mi_p.patientunitstayid
+INNER JOIN max_periodic AS ma_p
+    ON p.patientunitstayid = ma_p.patientunitstayid
+INNER JOIN min_eye
+    ON p.patientunitstayid = min_eye.patientunitstayid
+INNER JOIN max_eye
+    ON p.patientunitstayid = max_eye.patientunitstayid
+INNER JOIN min_verb
+    ON p.patientunitstayid = min_verb.patientunitstayid
+INNER JOIN max_verb
+    ON p.patientunitstayid = max_verb.patientunitstayid
+INNER JOIN min_motor
+    ON p.patientunitstayid = min_motor.patientunitstayid
+INNER JOIN max_motor
+    ON p.patientunitstayid = max_motor.patientunitstayid
+
+ORDER BY p.patientunitstayid;
